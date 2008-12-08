@@ -17,6 +17,20 @@
 
 #include "tuxconvert.h"
 
+/* New for Python 3: strict Unicode / CString sparation, so first
+   convert Unicode Object to Python String and then to C-String */
+
+char* utf8_to_cstring(PyObject * pystring) {
+  char* result = NULL;
+  if (PyUnicode_Check(pystring)) {
+      PyObject * pybytes  = PyUnicode_AsUTF8String(pystring);
+      result = PyBytes_AsString(pybytes);
+  }
+  return result;
+}
+      
+
+
 PyObject* fml_to_dict(FBFR32* fml) {
     PyObject* result = NULL;
     int res ;
@@ -152,7 +166,7 @@ FBFR32* dict_to_fml(PyObject* dict) {
 	    goto leave_func;
 	}
 	
-	key_cstring = PyBytes_AsString(key);
+	key_cstring = utf8_to_cstring(key);
 	id = Fldid32(key_cstring);
 	if (id == BADFLDID) {
 	    char tmp[1024] = "";
@@ -211,24 +225,11 @@ FBFR32* dict_to_fml(PyObject* dict) {
 			break;
 		    }
 		    
-		    if (PyLong_Check(pyvalue)) {
-			long cval = 0;
-			FLDLEN32 len = sizeof(cval);
-			
-			cval = PyLong_AsLong(pyvalue);
-			
-			if (Fchg32(fml, id, oc,(char*) &cval, len) < 0) {
-			    fprintf(stderr, "error in Fchg(): %s\n", Fstrerror(Ferror));
-			    goto leave_func;
-			}		    
-			break;
-		    }
-
-		    if (PyBytes_Check(pyvalue)) {
+		    if (PyUnicode_Check(pyvalue)) {
 			char * cval;
 			long lval = 0;
 
-			cval = PyBytes_AsString(pyvalue);
+			cval = utf8_to_cstring(pyvalue);
 			if (cval == NULL) {
 			    goto leave_func;
 			}
@@ -291,10 +292,10 @@ FBFR32* dict_to_fml(PyObject* dict) {
 			break;
 		    }
 
-		    if (PyBytes_Check(pyvalue)) {
+		    if (PyUnicode_Check(pyvalue)) {
 			char * cval;
 
-			cval = PyBytes_AsString(pyvalue);
+			cval = utf8_to_cstring(pyvalue);
 			if (cval == NULL) {
 			    goto leave_func;
 			}
@@ -307,7 +308,7 @@ FBFR32* dict_to_fml(PyObject* dict) {
 		    }
 
 		    fprintf(stderr, 
-			    "could not convert value for key %s to FML type FLD_LONG\n",
+			    "could not convert value for key %s to FML type FLD_STRING\n",
 			    key_cstring);
 		    goto leave_func;
 		    
@@ -349,7 +350,7 @@ char* pystring_to_string(PyObject* pyunicodestring) {
     /* Creates new Object */
     pystring = PyUnicode_AsUTF8String(pyunicodestring);
 
-    len = strlen(PyBytes_FromString(pystring));
+    len = strlen(PyBytes_AsString(pystring));
 
     if ((string = (char*)tpalloc("STRING", NULL, len+1)) == NULL) {
 	fprintf(stderr, "tpalloc(): %s\n", tpstrerror(tperrno));

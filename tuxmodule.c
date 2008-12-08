@@ -221,6 +221,10 @@ static PyObject * py_unsol_handler = NULL;
 /*     Definitions of local functions       */
 /*                                          */
 /* **************************************** */
+
+
+
+
 /* {{{ makeargvobject */
 
 /* This function is taken from the Python interpreter's source code. It converts the C
@@ -458,8 +462,6 @@ mainloop(int argc, char** argv) {
 #include "mainexit.h"
 #endif
     int res = 0;
-    
-    int i = 0;
 
     res = _tmstartserver( argc, argv, _tmgetsvrargs());
 }
@@ -1232,7 +1234,7 @@ static PyObject* tux_tpresume(PyObject* self, PyObject* arg) {
     
     TPTRANID tranid_binrep;
 
-    if (PyArg_ParseTuple(arg, "s|O", &tranid_strrep, &flags_py) < 0) {
+    if (PyArg_ParseTuple(arg, "y|O", &tranid_strrep, &flags_py) < 0) {
 	goto leave_func;
     }	
     
@@ -1333,7 +1335,7 @@ tux_tpinit(PyObject * self, PyObject * args)
 		fprintf(stderr, "tpinit(): PyList_GetItem(keys, %d) returned NULL\n", idx);
 		goto leave_func;
 	    }
-	    key_cstring = PyBytes_AsString(key);
+	    key_cstring = utf8_to_cstring(key);
 
 	    /*
 	      char      usrname[MAXTIDENT+2]; 
@@ -1347,19 +1349,19 @@ tux_tpinit(PyObject * self, PyObject * args)
 
 
 	    if (!strcmp(key_cstring, "usrname")) {
-		val_cstring = PyBytes_AsString(PyDict_GetItemString(input, key_cstring));  /* borrowed ref. */
+		val_cstring = utf8_to_cstring(PyDict_GetItemString(input, key_cstring));  /* borrowed ref. */
 		strcpy(tuxbuf->usrname, val_cstring);
 	    } else if (!strcmp(key_cstring, "cltname")) {
-		val_cstring = PyBytes_AsString(PyDict_GetItemString(input, key_cstring));  /* borrowed ref. */
+		val_cstring = utf8_to_cstring(PyDict_GetItemString(input, key_cstring));  /* borrowed ref. */
 		strcpy(tuxbuf->cltname, val_cstring);
 	    } else if (!strcmp(key_cstring, "passwd")) {
-		val_cstring = PyBytes_AsString(PyDict_GetItemString(input, key_cstring));  /* borrowed ref. */
+		val_cstring = utf8_to_cstring(PyDict_GetItemString(input, key_cstring));  /* borrowed ref. */
 		strcpy(tuxbuf->passwd, val_cstring);
 	    } else if (!strcmp(key_cstring, "grpname")) {
-		val_cstring = PyBytes_AsString(PyDict_GetItemString(input, key_cstring));  /* borrowed ref. */
+		val_cstring = utf8_to_cstring(PyDict_GetItemString(input, key_cstring));  /* borrowed ref. */
 		strcpy(tuxbuf->grpname, val_cstring);
 	    } else if (!strcmp(key_cstring, "data")) {
-		val_cstring = PyBytes_AsString(PyDict_GetItemString(input, key_cstring));  /* borrowed ref. */
+		val_cstring = utf8_to_cstring(PyDict_GetItemString(input, key_cstring));  /* borrowed ref. */
 		strncpy((char*)&(tuxbuf->data), val_cstring, TPINITDATASIZE-1);
 		tuxbuf->datalen = (long)strlen(val_cstring) + 1;
 	    } else if (!strcmp(key_cstring, "flags")) {
@@ -1716,28 +1718,28 @@ tux_tpenqueue(PyObject * self, PyObject * args)
 #endif
 	}
 	if ((item = PyDict_GetItemString (qctl_obj, "msgid")) != NULL) {
-	    strncpy(qctl.msgid, PyBytes_AsString(item), TMMSGIDLEN);
+	    strncpy(qctl.msgid, utf8_to_cstring(item), TMMSGIDLEN);
 #ifdef DEBUG
 	    printf("msgid = %s\n", qctl.msgid);
 #endif
 	    qctl.flags |= TPQBEFOREMSGID;
 	}
 	if ((item = PyDict_GetItemString (qctl_obj, "corrid")) != NULL) {
-	    strncpy(qctl.corrid, PyBytes_AsString(item), TMCORRIDLEN);
+	    strncpy(qctl.corrid, utf8_to_cstring(item), TMCORRIDLEN);
 #ifdef DEBUG
 	    printf("corrid = %s\n", qctl.corrid);
 #endif
 	    qctl.flags |= TPQCORRID;
 	}
 	if ((item = PyDict_GetItemString (qctl_obj, "replyqueue")) != NULL) {
-	    strncpy(qctl.replyqueue, PyBytes_AsString(item), TMQNAMELEN+1);
+	    strncpy(qctl.replyqueue, utf8_to_cstring(item), TMQNAMELEN+1);
 #ifdef DEBUG
 	    printf("replyqueue = %s\n", qctl.replyqueue);
 #endif
 	    qctl.flags |= TPQREPLYQ;
 	}
 	if ((item = PyDict_GetItemString (qctl_obj, "failurequeue")) != NULL) {
-	    strncpy(qctl.failurequeue, PyBytes_AsString(item), TMQNAMELEN+1);
+	    strncpy(qctl.failurequeue, utf8_to_cstring(item), TMQNAMELEN+1);
 #ifdef DEBUG
 	    printf("failurequeue = %s\n", qctl.failurequeue);
 #endif
@@ -1839,14 +1841,14 @@ tux_tpdequeue(PyObject * self, PyObject * args)
 	
 	/* Convert to TPQCTL structure */
 	if ((item = PyDict_GetItemString (qctl_obj, "msgid")) != NULL) { /* borrowed reference */
-	    strncpy(qctl.msgid, PyBytes_AsString(item), TMMSGIDLEN);
+	    strncpy(qctl.msgid, utf8_to_cstring(item), TMMSGIDLEN);
 #ifdef DEBUG
 	    printf("msgid = %s\n", qctl.msgid);
 #endif
 	    qctl.flags |= TPQGETBYMSGID;
 	}
 	if ((item = PyDict_GetItemString (qctl_obj, "corrid")) != NULL) {
-	    strncpy(qctl.corrid, PyBytes_AsString(item), TMCORRIDLEN);
+	    strncpy(qctl.corrid, utf8_to_cstring(item), TMCORRIDLEN);
 #ifdef DEBUG
 	    printf("corrid = %s\n", qctl.corrid);
 #endif
@@ -2034,13 +2036,13 @@ static PyObject* tux_tpsubscribe(PyObject* self, PyObject* arg) {
 	PyObject * item = NULL;
 	
 	if ((item = PyDict_GetItemString (ctl_obj, "name1")) != NULL) { /* borrowed reference */
-	  strncpy(ctl.name1, PyBytes_AsString(PyUnicode_AsUTF8String(item)), 32);
+	  strncpy(ctl.name1, utf8_to_cstring(item), 32);
 #ifdef DEBUG
 	    printf("name1 = %s\n", ctl.name1);
 #endif
 	}
 	if ((item = PyDict_GetItemString (ctl_obj, "name2")) != NULL) { /* borrowed reference */
-	  strncpy(ctl.name2, PyBytes_AsString(PyUnicode_AsUTF8String(item)), 32);
+	  strncpy(ctl.name2, utf8_to_cstring(item), 32);
 #ifdef DEBUG
 	    printf("name2 = %s\n", ctl.name2);
 #endif
@@ -2422,13 +2424,9 @@ tux_mainloop(PyObject * self, PyObject * args)
     for (i = 0; i < (argc = PyList_Size(argv_obj)); i++) {
 	PyObject* tmp;
 	tmp = PyList_GetItem(argv_obj, i);
-	if (PyUnicode_Check(tmp)) {
-	  PyObject * s = PyUnicode_AsUTF8String(tmp);
-	  
-	  if (!(argv[i] = PyBytes_AsString(s) )) {
-		fprintf(stderr, "argv[%d]: PyBytes_asString() \n", i);
-		return NULL;
-	    }
+	if (!(argv[i] = utf8_to_cstring(tmp) )) {
+	  fprintf(stderr, "argv[%d]: PyBytes_asString() \n", i);
+	  return NULL;
 	}
     } 
 

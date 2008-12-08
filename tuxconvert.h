@@ -24,7 +24,7 @@ extern FBFR32* dict_to_fml(PyObject* dict);
 extern char* pystring_to_string(PyObject* pystring);
 extern PyObject* string_to_pystring(char* string);
 
-
+extern char* utf8_to_cstring(PyObject * pystring);
 
 #endif /* TUXCONVERT_H */
 
