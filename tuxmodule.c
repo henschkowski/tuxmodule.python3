@@ -240,7 +240,7 @@ makeargvobject(int argc, char** argv)
     if (av != NULL) {
 	int i;
 	for (i = 0; i < argc; i++) {
-	    PyObject *v = PyBytes_FromString(argv[i]);
+	    PyObject *v = PyUnicode_FromString(argv[i]);
 	    if (v == NULL) {
 		Py_DECREF(av);
 		av = NULL;
@@ -461,10 +461,6 @@ mainloop(int argc, char** argv) {
     
     int i = 0;
 
-    for (i = 0; i < argc; i++) {
-      fprintf(stderr, "mainloop: index = %d\n", i);
-      fprintf(stderr, "mainloop: argv = %s\n", argv[i]);
-    }
     res = _tmstartserver( argc, argv, _tmgetsvrargs());
 }
 
@@ -482,7 +478,6 @@ tux_tpcall(PyObject * self, PyObject * args)
     PyObject * result = NULL;
     PyObject * input_py = NULL;
     PyObject * flags_py = NULL;
-    PyObject * service_py = NULL;
 
     char* service_name;
     char* tuxbuf = NULL;
@@ -496,7 +491,6 @@ tux_tpcall(PyObject * self, PyObject * args)
 	goto leave_func;
     }	
 
-    
     if (!service_name || (strlen(service_name) <= 0)) {
 	PyErr_SetString(PyExc_RuntimeError, "tpcall(): No service name  given");
 	goto leave_func;
@@ -624,22 +618,25 @@ tux_tpacall(PyObject * self, PyObject * args)
 {
     PyObject * result = NULL;
     PyObject * input_py = NULL;
-    PyObject * service_py = NULL;
     PyObject * flags_py = NULL;
-    
 
     char* service_name;
     char* tuxbuf = NULL;
     
-    
     long flags = 0;
     int handle = -1;
     
-    if (PyArg_ParseTuple(args, "OO|O", &service_py, &input_py, &flags_py) < 0) {
+    if (PyArg_ParseTuple(args, "sO|O", &service_name, &input_py, &flags_py) == 0) {
 	goto leave_func;
     }	
-    if (!service_py || ((service_name = PyBytes_AsString(service_py)) == NULL)) {
-	PyErr_SetString(PyExc_RuntimeError, "tpacall(): No service name and/or arguments given");
+
+    if (!service_name || (strlen(service_name) <= 0)) {
+	PyErr_SetString(PyExc_RuntimeError, "tpcall(): No service name  given");
+	goto leave_func;
+    }
+
+    if (!input_py) {
+	PyErr_SetString(PyExc_RuntimeError, "tpcall(): No arguments given");
 	goto leave_func;
     }
 

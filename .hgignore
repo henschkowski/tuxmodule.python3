@@ -6,5 +6,8 @@ syntax: glob
 ULOG.*
 TUXCONFIG
 *good.*
-
+stdout
+QFS
+.adm/.keydb
+tmusrevt.dat
 

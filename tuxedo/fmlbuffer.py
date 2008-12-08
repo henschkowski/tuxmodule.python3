@@ -1,5 +1,4 @@
 
-from UserDict import *
 from collections import *
 import types
 
