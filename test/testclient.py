@@ -333,7 +333,7 @@ class callback_obj:
     def cb_func(self, data):
         print("cb_func:")
         print(data)
-        self.counter = self.counter + int(data)
+        self.counter = self.counter + 1
 
 
 print("Instantiating callback object and registering handler function ...")

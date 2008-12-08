@@ -1967,7 +1967,6 @@ static PyObject* tux_tppost(PyObject* self, PyObject* arg) {
 
     PyObject * result   = NULL;
     PyObject * flags_py = NULL;
-    PyObject * evt_name = NULL;
     PyObject * evdata   = NULL;
 
     char * event_name = NULL;
@@ -1976,7 +1975,7 @@ static PyObject* tux_tppost(PyObject* self, PyObject* arg) {
     long flags = 0;
 
 
-    if (!PyArg_ParseTuple(arg, "OO|O", &evt_name, &evdata, &flags_py)) {
+    if (!PyArg_ParseTuple(arg, "sO|O", &event_name, &evdata, &flags_py)) {
 	goto leave_func;
     }
     if (flags_py) {
@@ -1986,10 +1985,6 @@ static PyObject* tux_tppost(PyObject* self, PyObject* arg) {
 	}
     }
 
-    if ((event_name = PyBytes_AsString(evt_name)) == NULL) {
-	PyErr_SetString(PyExc_RuntimeError, "tppost(): No event name given");
-	goto leave_func;
-    }
     if ((tuxbuf = transform_py_to_tux(evdata)) == NULL) {
 	goto leave_func;
     }
