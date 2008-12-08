@@ -372,7 +372,7 @@ static char* transform_py_to_tux(PyObject* res_py) {
     char* res_tux = NULL;
     if (PyDict_Check(res_py)) {
 	res_tux = (char*)dict_to_fml(res_py);
-    } else if (PyBytes_Check(res_py)) {
+    } else if (PyUnicode_Check(res_py)) {
 	res_tux = pystring_to_string(res_py);
     } else {
 	PyErr_SetString(PyExc_RuntimeError, "Only String or Dictionary arguments are allowed");
@@ -459,6 +459,12 @@ mainloop(int argc, char** argv) {
 #endif
     int res = 0;
     
+    int i = 0;
+
+    for (i = 0; i < argc; i++) {
+      fprintf(stderr, "mainloop: index = %d\n", i);
+      fprintf(stderr, "mainloop: argv = %s\n", argv[i]);
+    }
     res = _tmstartserver( argc, argv, _tmgetsvrargs());
 }
 
@@ -484,13 +490,20 @@ tux_tpcall(PyObject * self, PyObject * args)
     long outlen = 0;
     long flags = 0;
 	
-    fprintf(stderr, "Vor ParseTuple: (0x%x), ", args);
-    if (PyArg_ParseTuple(args, "OO|O", &service_py, &input_py, &flags_py) == 0) {
+
+ 
+    if (PyArg_ParseTuple(args, "sO|O", &service_name, &input_py, &flags_py) == 0) {
 	goto leave_func;
     }	
-    fprintf(stderr, "Nach ParseTuple: (%s), ", service_py);
-    if (!service_py || ((service_name = PyBytes_AsString(service_py)) == NULL)) {
-	PyErr_SetString(PyExc_RuntimeError, "tpcall(): No service name and/or arguments given");
+
+    
+    if (!service_name || (strlen(service_name) <= 0)) {
+	PyErr_SetString(PyExc_RuntimeError, "tpcall(): No service name  given");
+	goto leave_func;
+    }
+
+    if (!input_py) {
+	PyErr_SetString(PyExc_RuntimeError, "tpcall(): No arguments given");
 	goto leave_func;
     }
 
@@ -2024,13 +2037,13 @@ static PyObject* tux_tpsubscribe(PyObject* self, PyObject* arg) {
 	PyObject * item = NULL;
 	
 	if ((item = PyDict_GetItemString (ctl_obj, "name1")) != NULL) { /* borrowed reference */
-	    strncpy(ctl.name1, PyBytes_AsString(item), 32);
+	  strncpy(ctl.name1, PyBytes_AsString(PyUnicode_AsUTF8String(item)), 32);
 #ifdef DEBUG
 	    printf("name1 = %s\n", ctl.name1);
 #endif
 	}
 	if ((item = PyDict_GetItemString (ctl_obj, "name2")) != NULL) { /* borrowed reference */
-	    strncpy(ctl.name2, PyBytes_AsString(item), 32);
+	  strncpy(ctl.name2, PyBytes_AsString(PyUnicode_AsUTF8String(item)), 32);
 #ifdef DEBUG
 	    printf("name2 = %s\n", ctl.name2);
 #endif
@@ -2393,8 +2406,8 @@ tux_mainloop(PyObject * self, PyObject * args)
     PyObject*  argv_obj  = NULL;    
     PyObject*  xa_switch = NULL;    
     
-    /* 1st arg: argv, 2nd arg: server object, 3rd arg
-       (optional): XA function switch */
+    /* 1st arg: argv, 2nd arg: server object, 3rd arg reloader function
+       4th arg: (optional): XA function switch */
 
     if (!PyArg_ParseTuple(args, "OOO|O", 
 			  &argv_obj, &_server_obj, &_reloader_function, &xa_switch)) {
@@ -2412,22 +2425,13 @@ tux_mainloop(PyObject * self, PyObject * args)
     for (i = 0; i < (argc = PyList_Size(argv_obj)); i++) {
 	PyObject* tmp;
 	tmp = PyList_GetItem(argv_obj, i);
-#ifdef DEBUG
-	if (PyTuple_Check(tmp)) {
-	    printf("PyTuple detected\n");
-	}
-#endif
-	if (PyBytes_Check(tmp)) {
-	    if (!(argv[i] = PyBytes_AsString(tmp))) {
-#ifdef DEBUG
+	if (PyUnicode_Check(tmp)) {
+	  PyObject * s = PyUnicode_AsUTF8String(tmp);
+	  
+	  if (!(argv[i] = PyBytes_AsString(s) )) {
 		fprintf(stderr, "argv[%d]: PyBytes_asString() \n", i);
-#endif
 		return NULL;
 	    }
-#ifdef DEBUG
-		fprintf(stdout, "argv[%d] = %s \n", i, argv[i]);
-#endif
-
 	}
     } 
 

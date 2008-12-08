@@ -339,13 +339,17 @@ FBFR32* dict_to_fml(PyObject* dict) {
     return result;
 }
 
-char* pystring_to_string(PyObject* pystring) {
+char* pystring_to_string(PyObject* pyunicodestring) {
     char*        result = NULL;
     char*        string = NULL;
+    PyObject * pystring = NULL;
 
     long len = 0;
 
-    len = strlen(PyBytes_AsString(pystring));
+    /* Creates new Object */
+    pystring = PyUnicode_AsUTF8String(pyunicodestring);
+
+    len = strlen(PyBytes_FromString(pystring));
 
     if ((string = (char*)tpalloc("STRING", NULL, len+1)) == NULL) {
 	fprintf(stderr, "tpalloc(): %s\n", tpstrerror(tperrno));
@@ -356,6 +360,7 @@ char* pystring_to_string(PyObject* pystring) {
 
     result = string;
  leave_func:
+    Py_XDECREF(pystring);
     if (!result) {
 	tpfree((char*)string);
     }

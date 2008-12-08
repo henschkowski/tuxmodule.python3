@@ -66,7 +66,7 @@ WSL   		SRVGRP="WORKSTATION" SRVID=10
 
 
 "pyserver.py"	SRVID=70 SRVGRP=APP 
-"recv.py"	SRVID=100 SRVGRP=APP CONV=Y RQADDR="conversation" 
+### "recv.py"	SRVID=100 SRVGRP=APP CONV=Y RQADDR="conversation" 
 
 *SERVICES
 TOUPPER		AUTOTRAN=Y

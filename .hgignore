@@ -1,0 +1,10 @@
+syntax: glob
+*.pyc
+*.o
+*.so
+*.a
+ULOG.*
+TUXCONFIG
+*good.*
+
+
