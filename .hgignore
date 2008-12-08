@@ -10,4 +10,5 @@ stdout
 QFS
 .adm/.keydb
 tmusrevt.dat
+build/lib.linux-i686-3.0/*
 
