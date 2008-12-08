@@ -364,7 +364,7 @@ print(res1)
 tpchkunsol(0)
 
 print("Counter is %d" % (cbobj.counter))
-if cbobj.counter == 20 and res0 == res1:
+if cbobj.counter == 8  and res0 == res1:
     test.passed()
 else:
     test.failed()
