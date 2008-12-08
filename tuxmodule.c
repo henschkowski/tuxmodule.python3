@@ -720,7 +720,7 @@ tux_tpgetrply(PyObject * self, PyObject * args)
 
     if (tpgetrply(&handle, &tuxbuf, &outlen, flags) < 0) {
 	char tmp[200] = "";
-	sprintf(tmp, "tgetrply(): %d -  %s", tperrno, tpstrerror(tperrno));
+	sprintf(tmp, "tpgetrply(): %d -  %s", tperrno, tpstrerror(tperrno));
 	PyErr_SetString(PyExc_RuntimeError, tmp);
 	goto leave_func;
     }
@@ -2201,7 +2201,7 @@ static PyObject* tux_tpbroadcast(PyObject* self, PyObject* arg) {
     if (lmid_py == Py_None) {
 	lmid = NULL;
     } else {
-	if ((lmid = PyBytes_AsString(lmid_py)) == NULL) {
+	if ((lmid = utf8_to_cstring(lmid_py)) == NULL) {
 	    char tmp[200] = "";
 	    sprintf(tmp, "tpbroadcast(): no valid LMID");
 	    PyErr_SetString(PyExc_RuntimeError, tmp);
@@ -2212,7 +2212,7 @@ static PyObject* tux_tpbroadcast(PyObject* self, PyObject* arg) {
     if (usrname_py == Py_None) {
 	usrname = NULL;
     } else {
-	if ((usrname = PyBytes_AsString(usrname_py)) == NULL) {
+	if ((usrname = utf8_to_cstring(usrname_py)) == NULL) {
 	    char tmp[200] = "";
 	    sprintf(tmp, "tpbroadcast(): no valid usrname");
 	    PyErr_SetString(PyExc_RuntimeError, tmp);
@@ -2223,7 +2223,7 @@ static PyObject* tux_tpbroadcast(PyObject* self, PyObject* arg) {
     if (cltname_py == Py_None) {
 	cltname = NULL;
     } else {
-	if ((cltname = PyBytes_AsString(cltname_py)) == NULL) {
+	if ((cltname = utf8_to_cstring(cltname_py)) == NULL) {
 	    char tmp[200] = "";
 	    sprintf(tmp, "tpbroadcast(): no valid cltname");
 	    PyErr_SetString(PyExc_RuntimeError, tmp);

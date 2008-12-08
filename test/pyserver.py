@@ -47,12 +47,12 @@ class server:
         def UNSOLmethod_for_call_from_service_UNSOL(self, arg):     # get string and return string
 
                 print("UNSOL: %s" % self.cltid)
-                tpnotify(self.cltid, "1")
+                tpnotify(self.cltid, "from server: 1")
                 time.sleep(1)
-                tpnotify(self.cltid, "2")
-                tpnotify(self.cltid, "3")
+                tpnotify(self.cltid, "from server: 2")
+                tpnotify(self.cltid, "from server: 3")
 
-                tpbroadcast("simple", None, None, "4")
+                tpbroadcast("simple", None, None, "from server: 4")
 
                 return str.upper(arg)
 
@@ -69,6 +69,7 @@ class server:
                 return arg
 
         def ping(self, arg):
+                print("call ping and return ", arg)
                 return arg
 
         def service_3(self, arg):   # get whatever and return new FML buffer (elements are lists)
