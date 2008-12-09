@@ -1,7 +1,7 @@
 import os
 import re
 import tuxedo
-
+import imp
 
 
 class Reloader:
@@ -9,18 +9,26 @@ class Reloader:
     """ dynamically reload a server class if the .py file is newer than .pyc file """ 
 
     def __init__(self, module, server):
+        """ Init the reloader. Parameters are: the module of the class
+        to reload and the instance of the class to reload """
         self.last_mtime = 0
         self.first_run = 1
         self.server = server
         self.module = module
 
     def reloader_func(self):
+        tuxedo.atmi.userlog("Reload function called.")
         try:
+            tuxedo.atmi.userlog("Check source code modification ...")
             if self.load_if_modified() == 1:
+                tuxedo.atmi.userlog("Server code was modified -> reload.")
                 del self.server
                 self.server = self.module.server()
-        except:
-                tuxedo.atmi.userlog("can't reload " + repr(self.module))
+            else:
+                tuxedo.atmi.userlog("Server code was not modified.")
+                
+        except Exception as e:
+            tuxedo.atmi.userlog("Can't reload " + repr(self.module) + ". Exception is" + str(e))
         s=self.server
         return s
 
@@ -28,8 +36,8 @@ class Reloader:
     def load_if_modified(self):
         ret_val = 0
         mtime_pyc = 0
-        filename_pyc = re.match(r"<.* from '(.*)'>", repr(self.module)).group(1)
 
+        filename_pyc = re.match("<.* from '(.*)'>", repr(self.module)).group(1)
         m = re.match(r"(.*)\.py(.*)", filename_pyc)
         filename_base = m.group(1)
 
@@ -40,6 +48,7 @@ class Reloader:
             pass
 
         mtime_py = 0
+        mtime_pyc = 0
         try:
             m.group(2)
             filename_py = filename_base + ".py"
@@ -54,7 +63,7 @@ class Reloader:
             
         if mtime_pyc > self.last_mtime:
             if not self.first_run:
-                reload(self.module)
+                imp.reload(self.module)
                 ret_val = 1
         else:
             ret_val = 0
