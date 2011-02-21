@@ -11,7 +11,7 @@ tuxconfig = getenv('TUXCONFIG', '')
 qmconfig = getenv('QMCONFIG', '')
 uname = os.uname()[1]
 pwd = os.getcwd()
-python_exe = os.popen("which python").readline().strip()
+python_exe = sys.executable
 
 for line in sys.stdin.readlines():
     line = re.sub('%%APPDIR%%', appdir, line)

@@ -3,26 +3,26 @@ all:	demo
 demo:	TUXCONFIG tlog QFS server_exe
 
 tlog:
-	python rplc.py <  create_tlog | bash
+	python33 rplc.py <  create_tlog | bash
 
 QFS:
-	@if test -f QFS; then (python rplc.py < delete_queues | bash); fi
-	(python rplc.py < create_queues | bash ); true
+	@if test -f QFS; then (python3 rplc.py < delete_queues | bash); fi
+	(python3 rplc.py < create_queues | bash ); true
 
 server_exe:
-	python rplc.py < pyserver.py.templ > pyserver.py
+	python3 rplc.py < pyserver.py.templ > pyserver.py
 	chmod +x pyserver.py
-	python rplc.py < recv.py.templ > recv.py
+	python3 rplc.py < recv.py.templ > recv.py
 	chmod +x recv.py
-	python rplc.py < send.py.templ > send.py
+	python3 rplc.py < send.py.templ > send.py
 	chmod +x send.py
-	python rplc.py < simpcl.py.templ > simpcl.py
+	python3 rplc.py < simpcl.py.templ > simpcl.py
 	chmod +x simpcl.py
-	python rplc.py < testclient.py.templ > testclient.py
+	python3 rplc.py < testclient.py.templ > testclient.py
 	chmod +x testclient.py
 
 TUXCONFIG: ubbconfig
-	python rplc.py < ubbconfig | tmloadcf -y -
+	python3 rplc.py < ubbconfig | tmloadcf -y -
 
 
 clean:	
