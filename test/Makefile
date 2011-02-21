@@ -3,7 +3,7 @@ all:	demo
 demo:	TUXCONFIG tlog QFS server_exe
 
 tlog:
-	python33 rplc.py <  create_tlog | bash
+	python3 rplc.py <  create_tlog | bash
 
 QFS:
 	@if test -f QFS; then (python3 rplc.py < delete_queues | bash); fi
