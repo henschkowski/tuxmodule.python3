@@ -2426,7 +2426,10 @@ tux_mainloop(PyObject * self, PyObject * args)
     } 
 
     if (xa_switch) {
-	_set_XA_switch((struct xa_switch_t*)PyCObject_AsVoidPtr((PyObject*) xa_switch)); 
+        PyObject* xa_switch_capsule = PyCapsule_New(xa_switch, "xa_switch",  NULL);
+//	_set_XA_switch((struct xa_switch_t*)PyCObject_AsVoidPtr((PyObject*) xa_switch)); 
+	_set_XA_switch((struct xa_switch_t*)PyCapsule_GetPointer(xa_switch_capsule, "xa_switch")); 
+        Py_DECREF(xa_switch_capsule);
     }
 
     mainloop(argc, argv);
