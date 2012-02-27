@@ -2263,7 +2263,14 @@ static void unsol_handler(char* tuxbuf, long len, long flags) {
 	goto leave_func;
     }
 
+    /* Obtain the Global Interpreter Lock */
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure();
+
     PyObject_CallFunction (py_unsol_handler, "O", data_py); 
+
+    /* Release the thread. No Python API allowed beyond this point. */
+    PyGILState_Release(gstate);    
     
  leave_func:
     
