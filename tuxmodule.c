@@ -2255,6 +2255,11 @@ static void unsol_handler(char* tuxbuf, long len, long flags) {
 
     PyObject* data_py = NULL;
 
+    /* Obtain the Global Interpreter Lock */
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure();
+
+
     /* Transform the TUXEDO buffer to a Python type (len is not needed
        (only STRING/FML32 is supported), flags is not supported by TUXEDO */
 
@@ -2263,16 +2268,14 @@ static void unsol_handler(char* tuxbuf, long len, long flags) {
 	goto leave_func;
     }
 
-    /* Obtain the Global Interpreter Lock */
-    PyGILState_STATE gstate;
-    gstate = PyGILState_Ensure();
-
     PyObject_CallFunction (py_unsol_handler, "O", data_py); 
 
     /* Release the thread. No Python API allowed beyond this point. */
     PyGILState_Release(gstate);    
     
  leave_func:
+    Py_DECREF(data_py);
+
     
     return;
 }
