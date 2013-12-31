@@ -74,7 +74,7 @@ PyObject* fml_to_dict(FBFR32* fml) {
 	
 	if (strcmp(type, "long") == 0) {
 	    long longval = 0;
-	    FLDLEN32 longlen  = sizeof (FLDLEN32);
+	    FLDLEN32 longlen  = sizeof (long);
 	    PyObject* pyval;
 	    
 	    Fget32(fml, id, oc, (char*)&longval, &longlen);
@@ -83,7 +83,7 @@ PyObject* fml_to_dict(FBFR32* fml) {
 	    Py_DECREF(pyval);  /* reference now owned by list */
 	}  else if (strcmp(type, "double") == 0) {
 	    double doubleval = 0.0;
-	    FLDLEN32 doublelen  = sizeof (FLDLEN32);
+	    FLDLEN32 doublelen  = sizeof (long);
 	    PyObject* pyval;
 
 	    Fget32(fml, id, oc, (char*)&doubleval, &doublelen);
